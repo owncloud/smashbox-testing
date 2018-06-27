@@ -159,6 +159,81 @@ matrix:
       TEST_SUITE: nplusone
       SERVER_IMAGE: owncloud/base:bionic
 
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: reshareDir
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: scrapeLogFile
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: shareDir
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: shareFile
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: shareGroup
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: sharePermissions
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: uploadFiles
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: basicSync
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: concurrentDirRemove
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: shareLink
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: shareMountInit
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: sharePropagationGroups
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: sharePropagationInsideGroups
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: chunking
+      SERVER_IMAGE: owncloud/base:bionic
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-master
+      TEST_SUITE: nplusone
+      SERVER_IMAGE: owncloud/base:bionic
+
     - CLIENT_VERSION: 2.4
       SERVER_VERSION: daily-master
       TEST_SUITE: reshareDir
@@ -305,6 +380,81 @@ matrix:
       SERVER_IMAGE: owncloud/base:xenial
 
     - CLIENT_VERSION: master
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: nplusone
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: reshareDir
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: scrapeLogFile
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: shareDir
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: shareFile
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: shareGroup
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: sharePermissions
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: uploadFiles
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: basicSync
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: concurrentDirRemove
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: shareLink
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: shareMountInit
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: sharePropagationGroups
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: sharePropagationInsideGroups
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
+      SERVER_VERSION: daily-stable10
+      TEST_SUITE: chunking
+      SERVER_IMAGE: owncloud/base:xenial
+
+    - CLIENT_VERSION: 2.5
       SERVER_VERSION: daily-stable10
       TEST_SUITE: nplusone
       SERVER_IMAGE: owncloud/base:xenial
