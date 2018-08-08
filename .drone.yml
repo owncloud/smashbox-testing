@@ -23,7 +23,7 @@ pipeline:
       - tar -jxf owncloud-${SERVER_VERSION}.tar.bz2 -C /var/www
 
   install-files-primary-s3:
-    image: owncloud/base:latest
+    image: ${SERVER_IMAGE}
     pull: true
     commands:
       - cd /var/www/owncloud/apps
@@ -53,7 +53,10 @@ pipeline:
       - OWNCLOUD_REDIS_HOST=redis
       - OWNCLOUD_ADMIN_USERNAME=admin
       - OWNCLOUD_ADMIN_PASSWORD=admin
+      - OWNCLOUD_APPS_ENABLE=files_primary_s3
       - OWNCLOUD_OBJECTSTORE_ENABLED=true
+      - OWNCLOUD_OBJECTSTORE_CREATE_BUCKET=true
+      - OWNCLOUD_OBJECTSTORE_AUTOCREATE=false
       - OWNCLOUD_OBJECTSTORE_CLASS=OCA\Files_Primary_S3\S3Storage
       - OWNCLOUD_OBJECTSTORE_BUCKET=owncloud
       - OWNCLOUD_OBJECTSTORE_KEY=accessKey1
