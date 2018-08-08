@@ -38,6 +38,14 @@ pipeline:
     commands:
       - wait-for-it -t 300 scality:8000
 
+  create-bucket:
+    image: minio/mc
+    pull: true
+    environment:
+     - MC_HOSTS_scality=http://accessKey1:verySecretKey1@scality:8000
+    commands:
+     - mc mb scality/owncloud
+
   owncloud-server:
     image: ${SERVER_IMAGE}
     pull: true
