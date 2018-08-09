@@ -22,21 +22,19 @@ pipeline:
     commands:
       - tar -jxf owncloud-${SERVER_VERSION}.tar.bz2 -C /var/www
 
-  install-files-primary-s3:
-    image: owncloud/base:latest
-    pull: true
-    commands:
-      - cd /var/www/owncloud/apps
-      - git clone https://github.com/owncloud/files_primary_s3.git
-      - cd files_primary_s3
-      - wget https://raw.githubusercontent.com/composer/getcomposer.org/master/web/installer -O - -q | php -- --quiet
-      - php ./composer.phar install --no-dev --optimize-autoloader
-
   scality-waiting:
     image: owncloud/ubuntu:latest
     pull: true
     commands:
       - wait-for-it -t 300 scality:8000
+
+  create-bucket:
+    image: minio/mc
+    pull: true
+    environment:
+     - MC_HOSTS_scality=http://accessKey1:verySecretKey1@scality:8000
+    commands:
+     - mc mb scality/owncloud
 
   owncloud-server:
     image: ${SERVER_IMAGE}
@@ -53,6 +51,7 @@ pipeline:
       - OWNCLOUD_REDIS_HOST=redis
       - OWNCLOUD_ADMIN_USERNAME=admin
       - OWNCLOUD_ADMIN_PASSWORD=admin
+      - OWNCLOUD_APPS_INSTALL=files_primary_s3
       - OWNCLOUD_OBJECTSTORE_ENABLED=true
       - OWNCLOUD_OBJECTSTORE_CLASS=OCA\Files_Primary_S3\S3Storage
       - OWNCLOUD_OBJECTSTORE_BUCKET=owncloud
