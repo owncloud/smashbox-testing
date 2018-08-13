@@ -29,12 +29,14 @@ pipeline:
       - wait-for-it -t 300 scality:8000
 
   create-bucket:
-    image: minio/mc
+    image: mesosphere/aws-cli
     pull: true
     environment:
-     - MC_HOSTS_scality=http://accessKey1:verySecretKey1@scality:8000
+     - AWS_ACCESS_KEY_ID=accessKey1
+     - AWS_SECRET_ACCESS_KEY=verySecretKey1
     commands:
-     - mc mb scality/owncloud
+     - aws --endpoint-url http://scality:8000/ s3api create-bucket --bucket owncloud
+     - aws --endpoint-url http://scality:8000/ s3api put-bucket-versioning --bucket owncloud --versioning-configuration Status=Enabled
 
   owncloud-server:
     image: ${SERVER_IMAGE}
