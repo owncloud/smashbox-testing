@@ -22,6 +22,17 @@ pipeline:
     commands:
       - tar -jxf owncloud-${SERVER_VERSION}.tar.bz2 -C /var/www
 
+  s3-app-download:
+    image: plugins/download:1
+    pull: true
+    source: https://github.com/owncloud/files_primary_s3/releases/download/v1.0.3/files_primary_s3-1.0.3.tar.gz
+
+  s3-app-unpack:
+    image: owncloud/ubuntu:latest
+    pull: true
+    commands:
+      - tar -zxf files_primary_s3-1.0.3.tar.gz -C /var/www/owncloud/apps
+
   scality-waiting:
     image: owncloud/ubuntu:latest
     pull: true
@@ -53,7 +64,6 @@ pipeline:
       - OWNCLOUD_REDIS_HOST=redis
       - OWNCLOUD_ADMIN_USERNAME=admin
       - OWNCLOUD_ADMIN_PASSWORD=admin
-      - OWNCLOUD_APPS_INSTALL=files_primary_s3
       - OWNCLOUD_OBJECTSTORE_ENABLED=true
       - OWNCLOUD_OBJECTSTORE_CLASS=OCA\Files_Primary_S3\S3Storage
       - OWNCLOUD_OBJECTSTORE_BUCKET=owncloud
