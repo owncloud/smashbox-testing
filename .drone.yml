@@ -14,13 +14,13 @@ pipeline:
   owncloud-download:
     image: plugins/download:1
     pull: true
-    source: https://download.owncloud.org/community/owncloud-${SERVER_VERSION}.tar.bz2
+    source: https://download.owncloud.org/community/testing/owncloud-10.2.0RC2.tar.bz2
 
   owncloud-unpack:
     image: owncloud/ubuntu:latest
     pull: true
     commands:
-      - tar -jxf owncloud-${SERVER_VERSION}.tar.bz2 -C /var/www
+      - tar -jxf owncloud-10.2.0RC2.tar.bz2 -C /var/www
 
   owncloud-server:
     image: owncloud/base:bionic
@@ -59,16 +59,16 @@ pipeline:
     commands:
       - smash-wrapper
 
-  notify-rocketchat:
-    image: plugins/slack:1
-    pull: true
-    secrets: [ slack_webhook ]
-    channel: smashbox
-    template: >
-      *{{build.status}}* <{{build.link}}|{{repo.owner}}/{{repo.name}}#{{truncate build.commit 8}}> basic:${CLIENT_VERSION}:${SERVER_VERSION}:${TEST_SUITE}
-    when:
-      local: false
-      status: [ changed, failure ]
+#  notify-rocketchat:
+#    image: plugins/slack:1
+#    pull: true
+#    secrets: [ slack_webhook ]
+#    channel: smashbox
+#    template: >
+#      *{{build.status}}* <{{build.link}}|{{repo.owner}}/{{repo.name}}#{{truncate build.commit 8}}> basic:${CLIENT_VERSION}:${SERVER_VERSION}:${TEST_SUITE}
+#    when:
+#      local: false
+#      status: [ changed, failure ]
 
 services:
   mysql:
@@ -87,361 +87,136 @@ services:
 matrix:
   include:
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: reshareDir
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: scrapeLogFile
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareDir
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareFile
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareGroup
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePermissions
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: uploadFiles
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: basicSync
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: concurrentDirRemove
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareLink
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareMountInit
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePropagationGroups
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePropagationInsideGroups
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: chunking
 
     - CLIENT_VERSION: master
-      SERVER_VERSION: daily-master
       TEST_SUITE: nplusone
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: reshareDir
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: scrapeLogFile
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareDir
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareFile
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareGroup
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePermissions
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: uploadFiles
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: basicSync
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: concurrentDirRemove
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareLink
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareMountInit
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePropagationGroups
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePropagationInsideGroups
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: chunking
 
     - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-master
       TEST_SUITE: nplusone
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: reshareDir
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: scrapeLogFile
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareDir
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareFile
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareGroup
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePermissions
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: uploadFiles
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: basicSync
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: concurrentDirRemove
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareLink
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: shareMountInit
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePropagationGroups
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: sharePropagationInsideGroups
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
       TEST_SUITE: chunking
 
     - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-master
-      TEST_SUITE: nplusone
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: reshareDir
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: scrapeLogFile
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareDir
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareFile
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareGroup
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePermissions
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: uploadFiles
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: basicSync
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: concurrentDirRemove
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareLink
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareMountInit
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePropagationGroups
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePropagationInsideGroups
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: chunking
-
-    - CLIENT_VERSION: master
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: nplusone
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: reshareDir
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: scrapeLogFile
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareDir
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareFile
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareGroup
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePermissions
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: uploadFiles
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: basicSync
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: concurrentDirRemove
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareLink
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareMountInit
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePropagationGroups
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePropagationInsideGroups
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: chunking
-
-    - CLIENT_VERSION: 2.5
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: nplusone
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: reshareDir
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: scrapeLogFile
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareDir
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareFile
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareGroup
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePermissions
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: uploadFiles
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: basicSync
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: concurrentDirRemove
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareLink
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: shareMountInit
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePropagationGroups
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: sharePropagationInsideGroups
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
-      TEST_SUITE: chunking
-
-    - CLIENT_VERSION: 2.4
-      SERVER_VERSION: daily-stable10
       TEST_SUITE: nplusone
