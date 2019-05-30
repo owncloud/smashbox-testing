@@ -56,8 +56,20 @@ pipeline:
       - SMASHBOX_CLIENT_BRANCH=${CLIENT_VERSION}
       - SMASHBOX_TEST_FOLDER=/var/www/src/smashbox
       - SMASHBOX_CLIENT_FOLDER=/var/www/src/client
+    volumes:
+      - name: smashdir
+        path: /smashdir
     commands:
       - smash-wrapper
+
+  owncloud-client-logs:
+    image: owncloud/ubuntu:latest
+    pull: true
+    volumes:
+      - name: smashdir
+        path: /smashdir
+    commands:
+      - find /smashdir -type f -name '*.log' -exec bash -c 'echo; echo $1; cat $1' bash {} \;
 
   notify-rocketchat:
     image: plugins/slack:1
@@ -83,6 +95,10 @@ services:
   redis:
     image: library/redis:4.0
     pull: true
+
+volumes:
+  - name: smashdir
+    temp: {}
 
 matrix:
   include:
