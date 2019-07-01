@@ -14,13 +14,13 @@ pipeline:
   owncloud-download:
     image: plugins/download:1
     pull: true
-    source: https://download.owncloud.org/community/testing/owncloud-10.2.1RC1.tar.bz2
+    source: https://download.owncloud.org/community/testing/owncloud-10.2.1RC3.tar.bz2
 
   owncloud-unpack:
     image: owncloud/ubuntu:latest
     pull: true
     commands:
-      - tar -jxf owncloud-10.2.1RC1.tar.bz2 -C /var/www
+      - tar -jxf owncloud-10.2.1RC3.tar.bz2 -C /var/www
 
   owncloud-server:
     image: owncloud/base:bionic
