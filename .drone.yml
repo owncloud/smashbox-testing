@@ -42,6 +42,7 @@ pipeline:
     image: owncloud/ubuntu:latest
     pull: true
     commands:
+      - apt update -qq ; apt install -qq wait-for-it
       - wait-for-it -t 300 owncloud-server:8080
 
   smashbox-test:
