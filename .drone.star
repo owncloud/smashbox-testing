@@ -7,7 +7,7 @@ def main(ctx):
         },
     ]
 
-    client_versions = ["2.5", "2.6"]
+    client_versions = ["2.6", "2.7"]
 
     test_suites = [
         "reshareDir",
@@ -101,7 +101,7 @@ def smashbox(ctx, client_version, server_version, test_suite):
             },
             {
                 "name": "smashbox-test",
-                "image": "owncloud/smashbox:build",
+                "image": "owncloud/smashbox:latest",
                 "pull": "always",
                 "environment": {
                     "SMASHBOX_ACCOUNT_PASSWORD": "owncloud",
