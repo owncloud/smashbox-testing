@@ -75,7 +75,7 @@ def smashbox(ctx, client_version, server_version, test_suite):
             },
             {
                 "name": "owncloud-server",
-                "image": "owncloud/base:bionic",
+                "image": "owncloud/base:20.04",
                 "pull": "always",
                 "detach": True,
                 "environment": {
