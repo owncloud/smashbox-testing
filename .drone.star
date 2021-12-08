@@ -7,7 +7,7 @@ def main(ctx):
         },
     ]
 
-    client_versions = ["2.9", "2.10"]
+    client_versions = ["2.10", "2.11"]
 
     test_suites = [
         "reshareDir",
