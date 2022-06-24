@@ -117,7 +117,7 @@ def smashbox(ctx, client_version, server_version, test_suite):
                     "smash-wrapper",
                 ],
             },
-            rocketchat(ctx, client_version, server_version, test_suite),
+            #rocketchat(ctx, client_version, server_version, test_suite),
         ],
         "services": [
             {
