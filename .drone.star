@@ -1,3 +1,12 @@
+PLUGINS_SLACK = "plugins/slack:1"
+OC_CI_DRONE_CANCEL_PREVIOUS_BUILDS = "owncloudci/drone-cancel-previous-builds"
+
+config = {
+    "branches": [
+        "master",
+    ],
+}
+
 def main(ctx):
     server_versions = [
         {
@@ -11,30 +20,34 @@ def main(ctx):
 
     test_suites = [
         "reshareDir",
-        "scrapeLogFile",
-        "shareDir",
-        "shareFile",
-        "shareGroup",
-        "sharePermissions",
-        "uploadFiles",
-        "basicSync",
-        "concurrentDirRemove",
-        "shareLink",
-        "shareMountInit",
-        "sharePropagationGroups",
-        "sharePropagationInsideGroups",
-        "chunking",
-        "nplusone",
+        # "scrapeLogFile",
+        # "shareDir",
+        # "shareFile",
+        # "shareGroup",
+        # "sharePermissions",
+        # "uploadFiles",
+        # "basicSync",
+        # "concurrentDirRemove",
+        # "shareLink",
+        # "shareMountInit",
+        # "sharePropagationGroups",
+        # "sharePropagationInsideGroups",
+        # "chunking",
+        # "nplusone",
     ]
 
-    pipelines = []
+    before = cancel_previous_builds()
+
+    stages = []
 
     for client_version in client_versions:
         for server_version in server_versions:
             for test_suite in test_suites:
-                pipelines.append(smashbox(ctx, client_version, server_version, test_suite))
+                stages.append(smashbox(ctx, client_version, server_version, test_suite))
 
-    return pipelines
+    after = notify()
+
+    return before + dependsOn(before, stages) + dependsOn(stages, after)
 
 def smashbox(ctx, client_version, server_version, test_suite):
     return {
@@ -117,7 +130,6 @@ def smashbox(ctx, client_version, server_version, test_suite):
                     "smash-wrapper",
                 ],
             },
-            #rocketchat(ctx, client_version, server_version, test_suite),
         ],
         "services": [
             {
@@ -146,25 +158,71 @@ def smashbox(ctx, client_version, server_version, test_suite):
         },
     }
 
-def rocketchat(ctx, client_version, server_version, test_suite):
-    return {
-        "name": "notify",
-        "image": "plugins/slack",
-        "pull": "always",
-        "failure": "ignore",
-        "settings": {
-            "webhook": {
-                "from_secret": "slack_webhook",
-            },
-            "channel": "smashbox",
-            "template": "*{{build.status}}* <{{build.link}}|{{repo.owner}}/{{repo.name}}#{{truncate build.commit 8}}> basic:%s:%s:%s" % (client_version, server_version["value"], test_suite),
+def cancel_previous_builds():
+    return [{
+        "kind": "pipeline",
+        "type": "docker",
+        "name": "cancel-previous-builds",
+        "clone": {
+            "disable": True,
         },
-        "when": {
+        "steps": [{
+            "name": "cancel-previous-builds",
+            "image": OC_CI_DRONE_CANCEL_PREVIOUS_BUILDS,
+            "settings": {
+                "DRONE_TOKEN": {
+                    "from_secret": "drone_token",
+                },
+            },
+        }],
+        "depends_on": [],
+        "trigger": {
             "ref": [
-                "refs/heads/master",
+                "refs/pull/**",
+            ],
+        },
+    }]
+
+def notify():
+    result = {
+        "kind": "pipeline",
+        "type": "docker",
+        "name": "chat-notifications",
+        "clone": {
+            "disable": True,
+        },
+        "steps": [
+            {
+                "name": "notify-rocketchat",
+                "image": PLUGINS_SLACK,
+                "settings": {
+                    "webhook": {
+                        "from_secret": "private_rocketchat",
+                    },
+                    "channel": "desktop-client-builds",
+                },
+            },
+        ],
+        "depends_on": [],
+        "trigger": {
+            "ref": [
+                "refs/tags/**",
+                "refs/pull/**",
             ],
             "status": [
+                "success",
                 "failure",
             ],
         },
     }
+
+    for branch in config["branches"]:
+        result["trigger"]["ref"].append("refs/heads/%s" % branch)
+
+    return [result]
+
+def dependsOn(earlier_stages, nextStages):
+    for earlier_stage in earlier_stages:
+        for nextStage in nextStages:
+            nextStage["depends_on"].append(earlier_stage["name"])
+    return nextStages
