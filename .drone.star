@@ -2,7 +2,7 @@ def main(ctx):
     server_versions = [
         {
             "value": "daily-master",
-            "tarball": "https://download.owncloud.org/community/owncloud-daily-master.tar.bz2",
+            "tarball": "https://download.owncloud.com/server/daily/owncloud-daily-master.tar.bz2",
             # 'sha256': '488fc136a8000b42c447e224e69f16f5c31a231eea3038614fdea5e0c2218457',
         },
     ]
