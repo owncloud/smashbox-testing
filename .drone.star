@@ -16,24 +16,24 @@ def main(ctx):
         },
     ]
 
-    client_versions = ["2.10", "3.0"]
+    client_versions = ["2.11", "3.0"]
 
     test_suites = [
         "reshareDir",
-        # "scrapeLogFile",
-        # "shareDir",
-        # "shareFile",
-        # "shareGroup",
-        # "sharePermissions",
-        # "uploadFiles",
-        # "basicSync",
-        # "concurrentDirRemove",
-        # "shareLink",
-        # "shareMountInit",
-        # "sharePropagationGroups",
-        # "sharePropagationInsideGroups",
-        # "chunking",
-        # "nplusone",
+        "scrapeLogFile",
+        "shareDir",
+        "shareFile",
+        "shareGroup",
+        "sharePermissions",
+        "uploadFiles",
+        "basicSync",
+        "concurrentDirRemove",
+        "shareLink",
+        "shareMountInit",
+        "sharePropagationGroups",
+        "sharePropagationInsideGroups",
+        "chunking",
+        "nplusone",
     ]
 
     before = cancel_previous_builds()
@@ -199,7 +199,7 @@ def notify():
                     "webhook": {
                         "from_secret": "private_rocketchat",
                     },
-                    "channel": "desktop-client-builds",
+                    "channel": "builds",
                 },
             },
         ],
@@ -207,7 +207,6 @@ def notify():
         "trigger": {
             "ref": [
                 "refs/tags/**",
-                "refs/pull/**",
             ],
             "status": [
                 "success",
