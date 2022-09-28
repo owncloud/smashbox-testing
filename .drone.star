@@ -114,7 +114,7 @@ def smashbox(ctx, client_version, server_version, test_suite):
             },
             {
                 "name": "smashbox-test",
-                "image": "owncloud/smashbox:latest",
+                "image": "sawjan/smashbox:latest",
                 "pull": "always",
                 "environment": {
                     "SMASHBOX_ACCOUNT_PASSWORD": "owncloud",
