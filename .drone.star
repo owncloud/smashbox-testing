@@ -1,9 +1,6 @@
 PLUGINS_SLACK = "plugins/slack:1"
-PLUGINS_DOWNLOAD = "plugins/download"
 LIBRARY_MARIADB = "library/mariadb:10.3"
-LIBRARY_REDIS = "library/redis:4.0"
 OC_UBUNTU = "owncloud/ubuntu:20.04"
-OC_BASE = "owncloud/base:20.04"
 OC_CI_DRONE_CANCEL_PREVIOUS_BUILDS = "owncloudci/drone-cancel-previous-builds"
 OC_DOCKER_SMASHBOX = "sawjan/smashbox:appimage"
 OC_CI_CORE = "owncloudci/core"
@@ -14,44 +11,45 @@ config = {
     "branches": [
         "master",
     ],
+    "smashbox": {
+        "servers": ["daily-master"],
+        "clients": ["2.11", "3.0"],
+        "suites": [
+            "reshareDir",
+            "scrapeLogFile",
+            "shareDir",
+            "shareFile",
+            "shareGroup",
+            "sharePermissions",
+            "uploadFiles",
+            "basicSync",
+            "concurrentDirRemove",
+            "shareLink",
+            "shareMountInit",
+            "sharePropagationGroups",
+            "sharePropagationInsideGroups",
+            "chunking",
+            "nplusone",
+        ],
+    },
 }
 
 def main(ctx):
-    server_versions = ["daily-master"]
-
-    client_versions = ["2.11", "3.0"]
-
-    test_suites = [
-        "reshareDir",
-        "scrapeLogFile",
-        "shareDir",
-        "shareFile",
-        "shareGroup",
-        "sharePermissions",
-        "uploadFiles",
-        "basicSync",
-        "concurrentDirRemove",
-        "shareLink",
-        "shareMountInit",
-        "sharePropagationGroups",
-        "sharePropagationInsideGroups",
-        "chunking",
-        "nplusone",
-    ]
-
     before = cancel_previous_builds()
 
-    stages = smashbox_pipelines()
+    stages = smashbox_pipelines(ctx)
 
     after = notify()
 
     return before + dependsOn(before, stages) + dependsOn(stages, after)
 
-def smashbox_pipelines(ctx, client_version, server_version, test_suite):
+def smashbox_pipelines(ctx):
     pipelines = []
-    for client_version in client_versions:
-        for server_version in server_versions:
-            for test_suite in test_suites:
+    params = config["smashbox"]
+
+    for client_version in params["clients"]:
+        for server_version in params["servers"]:
+            for test_suite in params["suites"]:
                 pipeline = {
                     "kind": "pipeline",
                     "type": "docker",
