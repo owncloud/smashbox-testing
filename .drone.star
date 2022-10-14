@@ -1,5 +1,11 @@
 PLUGINS_SLACK = "plugins/slack:1"
+PLUGINS_DOWNLOAD = "plugins/download"
+LIBRARY_MARIADB = "library/mariadb:10.3"
+LIBRARY_REDIS = "library/redis:4.0"
+OC_UBUNTU = "owncloud/ubuntu:20.04"
+OC_BASE = "owncloud/base:20.04"
 OC_CI_DRONE_CANCEL_PREVIOUS_BUILDS = "owncloudci/drone-cancel-previous-builds"
+OC_DOCKER_SMASHBOX = "sawjan/smashbox:appimage"
 
 config = {
     "branches": [
@@ -64,8 +70,7 @@ def smashbox(ctx, client_version, server_version, test_suite):
         "steps": [
             {
                 "name": "download",
-                "image": "plugins/download",
-                "pull": "always",
+                "image": PLUGINS_DOWNLOAD,
                 "settings": {
                     "username": {
                         "from_secret": "download_username",
@@ -80,16 +85,14 @@ def smashbox(ctx, client_version, server_version, test_suite):
             },
             {
                 "name": "extract",
-                "image": "owncloud/ubuntu:latest",
-                "pull": "always",
+                "image": OC_UBUNTU,
                 "commands": [
                     "tar -xjf owncloud.tar.bz2 -C /var/www",
                 ],
             },
             {
                 "name": "owncloud-server",
-                "image": "owncloud/base:20.04",
-                "pull": "always",
+                "image": OC_BASE,
                 "detach": True,
                 "environment": {
                     "OWNCLOUD_DOMAIN": "owncloud-server",
@@ -106,16 +109,14 @@ def smashbox(ctx, client_version, server_version, test_suite):
             },
             {
                 "name": "owncloud-waiting",
-                "image": "owncloud/ubuntu:latest",
-                "pull": "always",
+                "image": OC_UBUNTU,
                 "commands": [
                     "wait-for-it -t 300 owncloud-server:8080",
                 ],
             },
             {
                 "name": "smashbox-test",
-                "image": "sawjan/smashbox:latest",
-                "pull": "always",
+                "image": OC_DOCKER_SMASHBOX,
                 "environment": {
                     "SMASHBOX_ACCOUNT_PASSWORD": "owncloud",
                     "SMASHBOX_URL": "owncloud-server:8080",
@@ -134,8 +135,7 @@ def smashbox(ctx, client_version, server_version, test_suite):
         "services": [
             {
                 "name": "mysql",
-                "image": "library/mariadb:10.3",
-                "pull": "always",
+                "image": LIBRARY_MARIADB,
                 "environment": {
                     "MYSQL_USER": "owncloud",
                     "MYSQL_PASSWORD": "owncloud",
@@ -145,8 +145,7 @@ def smashbox(ctx, client_version, server_version, test_suite):
             },
             {
                 "name": "redis",
-                "image": "library/redis:4.0",
-                "pull": "always",
+                "image": LIBRARY_REDIS,
             },
         ],
         "depends_on": [],
