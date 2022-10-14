@@ -6,6 +6,9 @@ OC_UBUNTU = "owncloud/ubuntu:20.04"
 OC_BASE = "owncloud/base:20.04"
 OC_CI_DRONE_CANCEL_PREVIOUS_BUILDS = "owncloudci/drone-cancel-previous-builds"
 OC_DOCKER_SMASHBOX = "sawjan/smashbox:appimage"
+OC_CI_CORE = "owncloudci/core"
+OC_CI_PHP = "owncloudci/php:7.4"
+OC_CI_WAIT_FOR = "owncloudci/wait-for:latest"
 
 config = {
     "branches": [
@@ -14,13 +17,7 @@ config = {
 }
 
 def main(ctx):
-    server_versions = [
-        {
-            "value": "daily-master",
-            "tarball": "https://download.owncloud.com/server/daily/owncloud-daily-master.tar.bz2",
-            # 'sha256': '488fc136a8000b42c447e224e69f16f5c31a231eea3038614fdea5e0c2218457',
-        },
-    ]
+    server_versions = ["daily-master"]
 
     client_versions = ["2.11", "3.0"]
 
@@ -44,118 +41,108 @@ def main(ctx):
 
     before = cancel_previous_builds()
 
-    stages = []
-
-    for client_version in client_versions:
-        for server_version in server_versions:
-            for test_suite in test_suites:
-                stages.append(smashbox(ctx, client_version, server_version, test_suite))
+    stages = smashbox_pipelines()
 
     after = notify()
 
     return before + dependsOn(before, stages) + dependsOn(stages, after)
 
-def smashbox(ctx, client_version, server_version, test_suite):
-    return {
-        "kind": "pipeline",
-        "type": "docker",
-        "name": "%s-%s-%s" % (client_version, test_suite, server_version["value"]),
-        "workspace": {
-            "base": "/var/www",
-        },
-        "platform": {
-            "os": "linux",
-            "arch": "amd64",
-        },
-        "steps": [
-            {
-                "name": "download",
-                "image": PLUGINS_DOWNLOAD,
-                "settings": {
-                    "username": {
-                        "from_secret": "download_username",
+def smashbox_pipelines(ctx, client_version, server_version, test_suite):
+    pipelines = []
+    for client_version in client_versions:
+        for server_version in server_versions:
+            for test_suite in test_suites:
+                pipeline = {
+                    "kind": "pipeline",
+                    "type": "docker",
+                    "name": "%s-%s-%s" % (client_version, test_suite, server_version),
+                    "workspace": {
+                        "base": "/var/www",
                     },
-                    "password": {
-                        "from_secret": "download_password",
+                    "platform": {
+                        "os": "linux",
+                        "arch": "amd64",
                     },
-                    "source": server_version["tarball"],
-                    # "sha256": server_version["sha256"],
-                    "destination": "owncloud.tar.bz2",
-                },
-            },
-            {
-                "name": "extract",
-                "image": OC_UBUNTU,
-                "commands": [
-                    "tar -xjf owncloud.tar.bz2 -C /var/www",
-                ],
-            },
-            {
-                "name": "owncloud-server",
-                "image": OC_BASE,
-                "detach": True,
-                "environment": {
-                    "OWNCLOUD_DOMAIN": "owncloud-server",
-                    "OWNCLOUD_DB_TYPE": "mysql",
-                    "OWNCLOUD_DB_NAME": "owncloud",
-                    "OWNCLOUD_DB_USERNAME": "owncloud",
-                    "OWNCLOUD_DB_PASSWORD": "owncloud",
-                    "OWNCLOUD_DB_HOST": "mysql",
-                    "OWNCLOUD_REDIS_ENABLED": True,
-                    "OWNCLOUD_REDIS_HOST": "redis",
-                    "OWNCLOUD_ADMIN_USERNAME": "admin",
-                    "OWNCLOUD_ADMIN_PASSWORD": "admin",
-                },
-            },
-            {
-                "name": "owncloud-waiting",
-                "image": OC_UBUNTU,
-                "commands": [
-                    "wait-for-it -t 300 owncloud-server:8080",
-                ],
-            },
-            {
-                "name": "smashbox-test",
-                "image": OC_DOCKER_SMASHBOX,
-                "environment": {
-                    "SMASHBOX_ACCOUNT_PASSWORD": "owncloud",
-                    "SMASHBOX_URL": "owncloud-server:8080",
-                    "SMASHBOX_USERNAME": "admin",
-                    "SMASHBOX_PASSWORD": "admin",
-                    "SMASHBOX_TEST_NAME": test_suite,
-                    "SMASHBOX_CLIENT_BRANCH": client_version,
-                    "SMASHBOX_TEST_FOLDER": "/var/www/src/smashbox",
-                    "SMASHBOX_CLIENT_FOLDER": "/var/www/src/client",
-                },
-                "commands": [
-                    "smash-wrapper",
-                ],
-            },
-        ],
-        "services": [
-            {
-                "name": "mysql",
-                "image": LIBRARY_MARIADB,
-                "environment": {
-                    "MYSQL_USER": "owncloud",
-                    "MYSQL_PASSWORD": "owncloud",
-                    "MYSQL_DATABASE": "owncloud",
-                    "MYSQL_ROOT_PASSWORD": "owncloud",
-                },
-            },
-            {
-                "name": "redis",
-                "image": LIBRARY_REDIS,
-            },
-        ],
-        "depends_on": [],
-        "trigger": {
-            "ref": [
-                "refs/heads/master",
-                "refs/pull/**",
-            ],
+                    "steps": install_core(server_version) +
+                             wait_for_server() +
+                             setup_server() +
+                             owncloud_log() +
+                             smashbox_tests(test_suite, client_version, "owncloud:8080"),
+                    "services": owncloud_service() + database_service(),
+                    "depends_on": [],
+                    "trigger": {
+                        "ref": [
+                            "refs/heads/master",
+                            "refs/pull/**",
+                        ],
+                    },
+                }
+                pipelines.append(pipeline)
+
+    return pipelines
+
+def smashbox_tests(test_suite, client_version, server):
+    return [{
+        "name": "smashbox-test",
+        "image": OC_DOCKER_SMASHBOX,
+        "environment": {
+            "SMASHBOX_ACCOUNT_PASSWORD": "owncloud",
+            "SMASHBOX_USERNAME": "admin",
+            "SMASHBOX_PASSWORD": "admin",
+            "SMASHBOX_URL": server,
+            "SMASHBOX_TEST_NAME": test_suite,
+            "SMASHBOX_CLIENT_BRANCH": client_version,
+            "SMASHBOX_TEST_FOLDER": "/var/www/src/smashbox",
+            "SMASHBOX_CLIENT_FOLDER": "/var/www/src/client",
         },
-    }
+        "commands": [
+            "smash-wrapper",
+        ],
+    }]
+
+def install_core(version):
+    return [{
+        "name": "install-core",
+        "image": OC_CI_CORE,
+        "settings": {
+            "version": version,
+            "core_path": "/var/www/owncloud/server",
+            "db_type": "mysql",
+            "db_name": "owncloud",
+            "db_host": "mysql",
+            "db_username": "owncloud",
+            "db_password": "owncloud",
+        },
+    }]
+
+def owncloud_log():
+    return [{
+        "name": "owncloud-log",
+        "image": OC_UBUNTU,
+        "detach": True,
+        "commands": [
+            "tail -f /var/www/owncloud/server/data/owncloud.log",
+        ],
+    }]
+
+def setup_server():
+    return [{
+        "name": "setup-server",
+        "image": OC_CI_PHP,
+        "commands": [
+            "cd /var/www/owncloud/server/",
+            "php occ config:system:set trusted_domains 1 --value=owncloud",
+        ],
+    }]
+
+def wait_for_server():
+    return [{
+        "name": "wait-for-ocis",
+        "image": OC_CI_WAIT_FOR,
+        "commands": [
+            "wait-for -it owncloud:8080 -t 300",
+        ],
+    }]
 
 def cancel_previous_builds():
     return [{
@@ -218,6 +205,34 @@ def notify():
         result["trigger"]["ref"].append("refs/heads/%s" % branch)
 
     return [result]
+
+def owncloud_service():
+    return [{
+        "name": "owncloud",
+        "image": OC_CI_PHP,
+        "environment": {
+            "APACHE_WEBROOT": "/var/www/owncloud/server/",
+        },
+        "command": [
+            "/usr/local/bin/apachectl",
+            "-e",
+            "debug",
+            "-D",
+            "FOREGROUND",
+        ],
+    }]
+
+def database_service():
+    return [{
+        "name": "mysql",
+        "image": LIBRARY_MARIADB,
+        "environment": {
+            "MYSQL_USER": "owncloud",
+            "MYSQL_PASSWORD": "owncloud",
+            "MYSQL_DATABASE": "owncloud",
+            "MYSQL_ROOT_PASSWORD": "owncloud",
+        },
+    }]
 
 def dependsOn(earlier_stages, nextStages):
     for earlier_stage in earlier_stages:
