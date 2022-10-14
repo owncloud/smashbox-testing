@@ -7,6 +7,11 @@ OC_CI_CORE = "owncloudci/core"
 OC_CI_PHP = "owncloudci/php:7.4"
 OC_CI_WAIT_FOR = "owncloudci/wait-for:latest"
 
+dir = {
+    "base": "/var/www",
+    "server": "/var/www/owncloud",
+}
+
 config = {
     "branches": [
         "master",
@@ -55,15 +60,15 @@ def smashbox_pipelines(ctx):
                     "type": "docker",
                     "name": "%s-%s-%s" % (client_version, test_suite, server_version),
                     "workspace": {
-                        "base": "/var/www",
+                        "base": dir["base"],
                     },
                     "platform": {
                         "os": "linux",
                         "arch": "amd64",
                     },
                     "steps": install_core(server_version) +
-                             wait_for_server() +
                              setup_server() +
+                             wait_for_server() +
                              owncloud_log() +
                              smashbox_tests(test_suite, client_version, "owncloud:8080"),
                     "services": owncloud_service() + database_service(),
@@ -90,8 +95,8 @@ def smashbox_tests(test_suite, client_version, server):
             "SMASHBOX_URL": server,
             "SMASHBOX_TEST_NAME": test_suite,
             "SMASHBOX_CLIENT_BRANCH": client_version,
-            "SMASHBOX_TEST_FOLDER": "/var/www/src/smashbox",
-            "SMASHBOX_CLIENT_FOLDER": "/var/www/src/client",
+            "SMASHBOX_TEST_FOLDER": "%s/smashbox" % dir["base"],
+            "SMASHBOX_CLIENT_FOLDER": "%s/client" % dir["base"],
         },
         "commands": [
             "smash-wrapper",
@@ -104,7 +109,7 @@ def install_core(version):
         "image": OC_CI_CORE,
         "settings": {
             "version": version,
-            "core_path": "/var/www/owncloud/server",
+            "core_path": dir["server"],
             "db_type": "mysql",
             "db_name": "owncloud",
             "db_host": "mysql",
@@ -119,7 +124,7 @@ def owncloud_log():
         "image": OC_UBUNTU,
         "detach": True,
         "commands": [
-            "tail -f /var/www/owncloud/server/data/owncloud.log",
+            "tail -f %s/data/owncloud.log" % dir["server"],
         ],
     }]
 
@@ -128,14 +133,14 @@ def setup_server():
         "name": "setup-server",
         "image": OC_CI_PHP,
         "commands": [
-            "cd /var/www/owncloud/server/",
+            "cd %s" % dir["server"],
             "php occ config:system:set trusted_domains 1 --value=owncloud",
         ],
     }]
 
 def wait_for_server():
     return [{
-        "name": "wait-for-ocis",
+        "name": "wait-for-server",
         "image": OC_CI_WAIT_FOR,
         "commands": [
             "wait-for -it owncloud:8080 -t 300",
@@ -209,7 +214,7 @@ def owncloud_service():
         "name": "owncloud",
         "image": OC_CI_PHP,
         "environment": {
-            "APACHE_WEBROOT": "/var/www/owncloud/server/",
+            "APACHE_WEBROOT": dir["server"],
         },
         "command": [
             "/usr/local/bin/apachectl",
