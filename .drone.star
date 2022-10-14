@@ -8,8 +8,8 @@ OC_CI_PHP = "owncloudci/php:7.4"
 OC_CI_WAIT_FOR = "owncloudci/wait-for:latest"
 
 dir = {
-    "base": "/var/www",
-    "server": "/var/www/owncloud",
+    "base": "/drone/src",
+    "server": "/drone/src/owncloud",
 }
 
 config = {
@@ -52,6 +52,8 @@ def smashbox_pipelines(ctx):
     pipelines = []
     params = config["smashbox"]
 
+    server = "owncloud:80"
+
     for client_version in params["clients"]:
         for server_version in params["servers"]:
             for test_suite in params["suites"]:
@@ -59,18 +61,16 @@ def smashbox_pipelines(ctx):
                     "kind": "pipeline",
                     "type": "docker",
                     "name": "%s-%s-%s" % (client_version, test_suite, server_version),
-                    "workspace": {
-                        "base": dir["base"],
-                    },
                     "platform": {
                         "os": "linux",
                         "arch": "amd64",
                     },
                     "steps": install_core(server_version) +
                              setup_server() +
-                             wait_for_server() +
+                             fix_permissions() +
+                             wait_for_server(server) +
                              owncloud_log() +
-                             smashbox_tests(test_suite, client_version, "owncloud:8080"),
+                             smashbox_tests(test_suite, client_version, server),
                     "services": owncloud_service() + database_service(),
                     "depends_on": [],
                     "trigger": {
@@ -118,6 +118,25 @@ def install_core(version):
         },
     }]
 
+def fix_permissions():
+    return [{
+        "name": "fix-permissions",
+        "image": OC_CI_PHP,
+        "commands": [
+            "cd %s && chown www-data * -R" % dir["server"],
+        ],
+    }]
+
+def setup_server():
+    return [{
+        "name": "setup-server",
+        "image": OC_CI_PHP,
+        "commands": [
+            "cd %s" % dir["server"],
+            "php ./occ config:system:set trusted_domains 1 --value=owncloud",
+        ],
+    }]
+
 def owncloud_log():
     return [{
         "name": "owncloud-log",
@@ -128,22 +147,12 @@ def owncloud_log():
         ],
     }]
 
-def setup_server():
-    return [{
-        "name": "setup-server",
-        "image": OC_CI_PHP,
-        "commands": [
-            "cd %s" % dir["server"],
-            "php occ config:system:set trusted_domains 1 --value=owncloud",
-        ],
-    }]
-
-def wait_for_server():
+def wait_for_server(server):
     return [{
         "name": "wait-for-server",
         "image": OC_CI_WAIT_FOR,
         "commands": [
-            "wait-for -it owncloud:8080 -t 300",
+            "wait-for -it %s -t 300" % server,
         ],
     }]
 
@@ -214,7 +223,7 @@ def owncloud_service():
         "name": "owncloud",
         "image": OC_CI_PHP,
         "environment": {
-            "APACHE_WEBROOT": dir["server"],
+            "APACHE_WEBROOT": "%s/" % dir["server"],
         },
         "command": [
             "/usr/local/bin/apachectl",
