@@ -1,4 +1,4 @@
-# agents.md — smashbox-testing
+# AGENTS.md — smashbox-testing
 
 ## Repository Overview
 
